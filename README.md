@@ -53,7 +53,7 @@ claude plugin marketplace remove shuorenhua-local
 {
   "default": {
     "provider": "agy",
-    "model": "gemini-flash"
+    "model": "Gemini 3.5 Flash (Medium)"
   }
 }
 ```
@@ -62,7 +62,7 @@ claude plugin marketplace remove shuorenhua-local
 
 ```bash
 export SHUORENHUA_PROVIDER=agy
-export SHUORENHUA_MODEL=gemini-flash
+export SHUORENHUA_MODEL="Gemini 3.5 Flash (Medium)"
 ```
 
 优先级：
@@ -83,7 +83,7 @@ export SHUORENHUA_MODEL=gemini-flash
 
 ```text
 /srh
-/srh --provider agy --model gemini-flash
+/srh --provider agy --model "Gemini 3.5 Flash (Medium)"
 /srh --max-messages 80 --max-chars 60000
 /srh --transcript /absolute/path/to/session.jsonl
 /srh:setup
