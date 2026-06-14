@@ -12,6 +12,7 @@
       "author": {
         "name": "stardust"
       },
+      "version": "0.1.1",
       "category": "productivity",
       "source": "./",
       "homepage": "https://github.com/stardust/cc-plugin-shuorenhua"

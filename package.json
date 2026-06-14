@@ -1,6 +1,6 @@
 {
   "name": "cc-plugin-shuorenhua",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Claude Code plugin that translates the current session transcript into a concise Chinese handoff.",

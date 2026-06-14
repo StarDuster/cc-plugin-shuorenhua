@@ -92,19 +92,19 @@ export SHUORENHUA_MODEL="Gemini 3.5 Flash (Medium)"
 /srh --transcript /absolute/path/to/session.jsonl
 ```
 
-### `/srh:cn` — 当前 session 内摘要
+### `/srh:inline` — 当前 session 内摘要
 
-不调用外部 CLI，输出 prompt 文本，配合当前 Claude Code session 使用。适合主 session 跑 Opus 时用 Sonnet subagent 生成中文摘要，不产生额外 CLI 用量：
+不调用外部 CLI，直接让 Sonnet subagent 生成中文摘要。适合主 session 跑 Opus 时使用，不产生额外 CLI 用量：
 
 ```text
-/srh:cn
+/srh:inline
 ```
 
-命令会输出 `scripts/shuorenhua.mjs prompt` 命令路径。复制执行后把输出交给 Agent（model: sonnet）处理即可。
+命令会让 Sonnet Agent 执行 `scripts/shuorenhua.mjs prompt`，读取当前 transcript，并直接返回中文摘要。
 
 ### `prompt` 子命令
 
-`/srh:cn` 背后调用的脚本子命令。只读取 transcript、构建 prompt 文本输出到 stdout，不调用任何 LLM：
+`/srh:inline` 背后调用的脚本子命令。只读取 transcript、构建 prompt 文本输出到 stdout，不调用任何 LLM：
 
 ```bash
 node scripts/shuorenhua.mjs prompt
