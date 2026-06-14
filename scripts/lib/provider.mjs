@@ -1,16 +1,16 @@
 import { spawn } from "node:child_process";
 
+import { buildAgyCommand, runAgy } from "./agy.mjs";
+
 export function buildProviderCommand(provider, providerConfig = {}, model, prompt) {
+  if (provider === "agy") {
+    return buildAgyCommand(providerConfig, model, prompt);
+  }
+
   const bin = providerConfig.bin || provider;
   const args = [];
 
-  if (provider === "agy") {
-    args.push("--print");
-    if (model) {
-      args.push("--model", model);
-    }
-    args.push(prompt);
-  } else if (provider === "opencode") {
+  if (provider === "opencode") {
     args.push("run");
     if (model) {
       args.push("--model", model);
@@ -36,6 +36,10 @@ export function buildProviderCommand(provider, providerConfig = {}, model, promp
 }
 
 export async function runProvider({ provider, providerConfig = {}, model, prompt, cwd = process.cwd(), env = process.env }) {
+  if (provider === "agy") {
+    return runAgy({ providerConfig, model, prompt, cwd, env });
+  }
+
   const { bin, args } = buildProviderCommand(provider, providerConfig, model, prompt);
   const timeoutMs = Number.parseInt(String(providerConfig.timeoutMs ?? 300000), 10);
   const child = spawn(bin, args, {

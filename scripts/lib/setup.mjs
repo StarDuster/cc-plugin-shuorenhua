@@ -51,7 +51,7 @@ export function renderSetupReport(report) {
         {
           default: {
             provider: "agy",
-            model: "gemini-flash"
+            model: "Gemini 3.5 Flash (Medium)"
           }
         },
         null,

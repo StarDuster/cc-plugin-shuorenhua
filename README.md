@@ -81,11 +81,40 @@ export SHUORENHUA_MODEL="Gemini 3.5 Flash (Medium)"
 
 ## 使用
 
+### `/srh` — 外部 provider 摘要
+
+通过配置的外部 CLI（agy、opencode、omp、claude）生成中文摘要：
+
 ```text
 /srh
 /srh --provider agy --model "Gemini 3.5 Flash (Medium)"
 /srh --max-messages 80 --max-chars 60000
 /srh --transcript /absolute/path/to/session.jsonl
+```
+
+### `/srh:cn` — 当前 session 内摘要
+
+不调用外部 CLI，输出 prompt 文本，配合当前 Claude Code session 使用。适合主 session 跑 Opus 时用 Sonnet subagent 生成中文摘要，不产生额外 CLI 用量：
+
+```text
+/srh:cn
+```
+
+命令会输出 `scripts/shuorenhua.mjs prompt` 命令路径。复制执行后把输出交给 Agent（model: sonnet）处理即可。
+
+### `prompt` 子命令
+
+`/srh:cn` 背后调用的脚本子命令。只读取 transcript、构建 prompt 文本输出到 stdout，不调用任何 LLM：
+
+```bash
+node scripts/shuorenhua.mjs prompt
+node scripts/shuorenhua.mjs prompt --max-messages 80 --max-chars 60000
+node scripts/shuorenhua.mjs prompt --transcript /path/to/session.jsonl
+```
+
+### `/srh:setup` — 检查配置
+
+```text
 /srh:setup
 ```
 
@@ -97,6 +126,14 @@ export SHUORENHUA_MODEL="Gemini 3.5 Flash (Medium)"
 - SessionStart hook 会记录当前 `session_id`，优先定位当前会话。
 - 找不到当前 session 时，会回退到当前项目最新的 `.jsonl`。
 - transcript 会原样发送给你配置的 provider，不默认脱敏。
+
+## agy 调用安全策略
+
+- Claude command 只允许执行插件自己的 `scripts/shuorenhua.mjs`。
+- 插件用 Node `spawn` 参数数组调用 `agy`，不通过 shell 拼命令。
+- 运行前会调用 `agy models`，确认配置的模型名存在。
+- `agy` 的 stdout、stderr、metadata 会写到 `~/.cache/shuorenhua/...`，方便排错。
+- debug 命令文件不会保存完整 transcript prompt，只写 `<prompt>` 占位。
 
 ## 注意
 

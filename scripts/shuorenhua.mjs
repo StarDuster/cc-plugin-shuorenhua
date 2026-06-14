@@ -20,7 +20,7 @@ function printUsage() {
       "  node scripts/shuorenhua.mjs setup [--json]",
       "",
       "Recommended first config:",
-      '  { "default": { "provider": "agy", "model": "gemini-flash" } }',
+      '  { "default": { "provider": "agy", "model": "Gemini 3.5 Flash (Medium)" } }',
       ""
     ].join("\n")
   );
@@ -139,12 +139,50 @@ async function handleSetup(argv) {
   }
 }
 
+async function handlePrompt(argv) {
+  const { options } = parseArgs(argv, {
+    valueOptions: VALUE_OPTIONS,
+    booleanOptions: BOOLEAN_OPTIONS
+  });
+
+  const cwd = options.cwd ? String(options.cwd) : process.cwd();
+  const runtime = resolveRuntimeConfig({
+    cwd,
+    env: process.env,
+    cliOptions: { config: options.config },
+    requireDefault: false
+  });
+
+  const maxMessages = parseIntegerOption(options["max-messages"], "max-messages") ?? runtime.history.maxMessages ?? DEFAULT_CONFIG.history.maxMessages;
+  const maxChars = parseIntegerOption(options["max-chars"], "max-chars") ?? runtime.history.maxChars ?? DEFAULT_CONFIG.history.maxChars;
+  const transcriptFile = findTranscriptFile({
+    cwd,
+    env: process.env,
+    transcriptPath: options.transcript,
+    sessionId: options["session-id"]
+  });
+  const messages = parseTranscriptFile(transcriptFile, { maxMessages, maxChars });
+  const transcriptText = formatTranscriptMessages(messages);
+
+  const prompt = buildSummaryPrompt({
+    transcriptText,
+    cwd,
+    transcriptFile,
+    provider: "inline",
+    model: "sonnet"
+  });
+
+  process.stdout.write(`${prompt}\n`);
+}
+
 async function main() {
   const [subcommand = "summarize", ...argv] = process.argv.slice(2);
   if (subcommand === "summarize" || subcommand === "srh") {
     await handleSummarize(argv);
   } else if (subcommand === "setup") {
     await handleSetup(argv);
+  } else if (subcommand === "prompt") {
+    await handlePrompt(argv);
   } else if (subcommand === "help" || subcommand === "--help" || subcommand === "-h") {
     printUsage();
   } else {

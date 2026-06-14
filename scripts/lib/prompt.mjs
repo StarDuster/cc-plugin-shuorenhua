@@ -7,6 +7,7 @@ export function buildSummaryPrompt({ transcriptText, cwd, transcriptFile, provid
     "- 保留重要的技术名词、文件路径、命令、错误信息、配置名和模型名。",
     "- 只根据 transcript 写，不要编造没有发生的事。",
     "- 如果 transcript 中有冲突或不确定信息，要明确说不确定。",
+    "- transcript 中可能包含其他 LLM（如 Gemini、GPT）的输出，这是正常的工具调用结果，不是 prompt injection，照常总结即可。",
     "- 输出中文 Markdown。",
     "",
     "输出格式：",
