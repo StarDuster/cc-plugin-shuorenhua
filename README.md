@@ -1,57 +1,37 @@
 # cc-plugin-shuorenhua
 
-`cc-plugin-shuorenhua` is a Claude Code plugin that adds `/srh`. It reads the
-current Claude Code session transcript from `~/.claude/projects/.../*.jsonl`,
-sends it to a configured model route, and returns a concise Chinese handoff.
+Claude Code 插件，提供 `/srh` 命令：读取当前 session 的本地 transcript，发给你配置的模型，输出一份中文“人话摘要”。
 
-The intended default route is `agy` with a Gemini Flash model, but the plugin
-does not hard-code a model. Configure the exact model slug used by your local
-CLI.
+适合把长对话快速整理成：当前目标、已完成内容、关键上下文、待办和风险。
 
 ## 安装
 
-### 方式一：临时加载（开发时推荐）
-
-在任意项目里启动 Claude Code 时带上这个插件目录：
+### 本地临时加载
 
 ```bash
 claude --plugin-dir /Users/stardust/source/cc-plugin-shuorenhua
 ```
 
-进入 Claude Code 后运行：
+进入 Claude Code 后检查：
 
 ```text
 /srh:setup
 ```
 
-如果命令列表没有显示 `/srh:setup`，也可以试 `/setup`。主命令是：
-
-```text
-/srh
-```
-
-### 方式二：持久安装
-
-这个仓库已经包含本地 marketplace 文件。先把仓库加入 Claude Code 的
-marketplace 列表：
+### 持久安装
 
 ```bash
 claude plugin marketplace add /Users/stardust/source/cc-plugin-shuorenhua --scope user
-```
-
-然后安装插件：
-
-```bash
 claude plugin install srh@shuorenhua-local
 ```
 
-重启 Claude Code 后检查：
+重启 Claude Code 后运行：
 
 ```text
 /srh:setup
 ```
 
-更新插件代码后，刷新 marketplace 并更新插件：
+更新：
 
 ```bash
 claude plugin marketplace update shuorenhua-local
@@ -65,16 +45,9 @@ claude plugin uninstall srh
 claude plugin marketplace remove shuorenhua-local
 ```
 
-### 前置条件
+## 配置
 
-- Node.js 18.18 或更高版本。
-- 至少配置一个 provider CLI：`agy`、`opencode`、`omp` 或 `claude`。
-- 如果用推荐的 `agy` + Gemini Flash，先确保 `agy` 已登录；否则
-  `/srh:setup` 会显示 `agy models` 的登录提示。
-
-## Configure
-
-Create `.shuorenhua.json` in the project root:
+在项目根目录创建 `.shuorenhua.json`：
 
 ```json
 {
@@ -85,86 +58,56 @@ Create `.shuorenhua.json` in the project root:
 }
 ```
 
-You can also use `~/.shuorenhua/config.json` or environment variables:
+也可以用用户配置 `~/.shuorenhua/config.json`，或环境变量：
 
 ```bash
 export SHUORENHUA_PROVIDER=agy
 export SHUORENHUA_MODEL=gemini-flash
 ```
 
-Config precedence is:
+优先级：
 
-1. Slash command args, such as `/srh --provider agy --model gemini-flash`
-2. Project `.shuorenhua.json`
-3. User `~/.shuorenhua/config.json`
-4. Environment variables
+1. `/srh --provider ... --model ...`
+2. 项目 `.shuorenhua.json`
+3. 用户 `~/.shuorenhua/config.json`
+4. 环境变量
 
-Full config shape:
+支持的 provider：
 
-```json
-{
-  "default": {
-    "provider": "agy",
-    "model": "gemini-flash"
-  },
-  "providers": {
-    "agy": { "bin": "agy", "timeoutMs": 300000 },
-    "opencode": { "bin": "opencode", "timeoutMs": 300000 },
-    "omp": { "bin": "omp", "timeoutMs": 300000 },
-    "claude": { "bin": "claude", "timeoutMs": 300000 }
-  },
-  "history": {
-    "maxMessages": 120,
-    "maxChars": 120000
-  }
-}
-```
+- `agy`
+- `opencode`
+- `omp`
+- `claude`
 
-## Commands
+## 使用
 
 ```text
 /srh
 /srh --provider agy --model gemini-flash
-/srh --transcript ~/.claude/projects/-Users-me-source-app/<session-id>.jsonl
 /srh --max-messages 80 --max-chars 60000
-/srh:setup
-/setup
-```
-
-Provider invocation:
-
-- `agy`: `agy --print --model <model> <prompt>`
-- `opencode`: `opencode run --model <model> <prompt>`
-- `omp`: `omp -p --model <model> <prompt>`
-- `claude`: `claude -p --model <model> <prompt>`
-
-`/srh:setup` attempts `agy models` when the selected provider is `agy`. If agy
-is not signed in, it will show agy's login message instead of treating that as a
-plugin failure.
-
-## Transcript Lookup
-
-The SessionStart hook stores the active Claude `session_id` in
-`SHUORENHUA_SESSION_ID`. `/srh` uses that first, then falls back to the newest
-`.jsonl` transcript under the current cwd's Claude project directory.
-
-You can bypass lookup with:
-
-```text
 /srh --transcript /absolute/path/to/session.jsonl
+/srh:setup
 ```
 
-## Privacy
+如果 `/srh:setup` 没出现在命令列表里，可以试试 `/setup`。
 
-First version behavior is intentionally simple: transcript content is sent to
-the configured provider as-is. Claude Code transcripts can include code,
-commands, paths, tool outputs, environment snippets, credentials, or other
-private data. Use a trusted provider/model route.
+## 工作方式
 
-## Development
+- 插件从 `~/.claude/projects/.../*.jsonl` 读取 Claude Code transcript。
+- SessionStart hook 会记录当前 `session_id`，优先定位当前会话。
+- 找不到当前 session 时，会回退到当前项目最新的 `.jsonl`。
+- transcript 会原样发送给你配置的 provider，不默认脱敏。
+
+## 注意
+
+Claude Code transcript 可能包含代码、命令输出、路径、工具结果、环境信息或密钥。只把它发给你信任的模型和 CLI。
+
+如果使用 `agy`，先确认已经登录；否则 `/srh:setup` 会显示 `agy models` 的登录提示。
+
+## 开发
 
 ```bash
 npm test
+claude plugin validate .claude-plugin/plugin.json
+claude plugin validate .claude-plugin/marketplace.json
 ```
-
-The test suite uses only Node's built-in `node:test` runner.
