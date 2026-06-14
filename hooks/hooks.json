@@ -1,0 +1,16 @@
+{
+  "description": "Capture the active Claude Code session id for /srh transcript lookup.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/session-hook.mjs\" SessionStart",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

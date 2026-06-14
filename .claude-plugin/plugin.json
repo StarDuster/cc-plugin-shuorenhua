@@ -1,0 +1,8 @@
+{
+  "name": "srh",
+  "version": "0.1.0",
+  "description": "Translate the current Claude Code session transcript into concise Chinese plain-language notes.",
+  "author": {
+    "name": "stardust"
+  }
+}

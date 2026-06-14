@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "shuorenhua-local",
+  "description": "Local marketplace for the Shuorenhua Claude Code plugin.",
+  "owner": {
+    "name": "stardust"
+  },
+  "plugins": [
+    {
+      "name": "srh",
+      "description": "Translate the current Claude Code session transcript into concise Chinese plain-language notes.",
+      "author": {
+        "name": "stardust"
+      },
+      "category": "productivity",
+      "source": "./",
+      "homepage": "https://github.com/stardust/cc-plugin-shuorenhua"
+    }
+  ]
+}
